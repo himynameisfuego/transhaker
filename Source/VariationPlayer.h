@@ -58,8 +58,8 @@ public:
     struct Params
     {
         // +/- pitchPercent not yet used (for future pitch shift)
-        float pitchPercentRange = 5.0f;      // e.g. 5 -> ±5%
-        float gainDbRange = 3.0f;      // e.g. 3 -> ±3 dB
+        float pitchPercentRange = 5.0f;      // e.g. 5 -> Â±5%
+        float gainDbRange = 3.0f;      // e.g. 3 -> Â±3 dB
         float maxOffsetMs = 5.0f;      // skip up to this many ms at start
         float lpfMinHz = 4000.0f;   // not used yet
         float lpfMaxHz = 12000.0f;  // not used yet

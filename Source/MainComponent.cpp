@@ -1,11 +1,5 @@
 #include "MainComponent.h"
-
-// Temporary stub until we add export-to-disk batching
-class OfflineRenderer
-{
-public:
-    void renderBatch() {}
-};
+#include "OfflineRenderer.h"
 
 // =========================================================
 // Constructor / Destructor
@@ -125,6 +119,9 @@ MainComponent::MainComponent()
     // sampleRate filled in prepareToPlay()
 
     variationPlayer.setParams(currentParams);
+    offlineRenderer = std::make_unique<OfflineRenderer>();
+    offlineRenderer->setSamplePool(&samplePool);
+    offlineRenderer->setParams(currentParams);
 
     // Request 0 inputs, 2 outputs
     setAudioChannels(0, 2);
@@ -145,10 +142,13 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 {
     variationPlayer.prepareToPlay(samplesPerBlockExpected, sampleRate);
 
-    // push correct sampleRate into params
     currentParams.sampleRate = sampleRate;
     variationPlayer.setParams(currentParams);
+
+    if (offlineRenderer)
+        offlineRenderer->setParams(currentParams);
 }
+
 
 void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
@@ -269,7 +269,7 @@ void MainComponent::buttonClicked(juce::Button* b)
         if (!offlineRenderer)
             offlineRenderer = std::make_unique<OfflineRenderer>();
 
-        offlineRenderer->renderBatch();
+        offlineRenderer->renderBatch(this);
     }
 }
 
@@ -286,4 +286,6 @@ void MainComponent::sliderValueChanged(juce::Slider* s)
     // sampleRate already stored in currentParams.sampleRate
 
     variationPlayer.setParams(currentParams);
+    if (offlineRenderer)
+        offlineRenderer->setParams(currentParams);
 }

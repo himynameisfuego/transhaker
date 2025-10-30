@@ -4,6 +4,14 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" version="0.1.0">
   <MAINGROUP id="n7H7sK" name="Transhaker">
     <GROUP id="{29B45408-DAB7-81EE-5A42-A31C16388ACE}" name="Source">
+      <FILE id="ETAY9j" name="OfflineRenderer.cpp" compile="1" resource="0"
+            file="Source/OfflineRenderer.cpp"/>
+      <FILE id="AR4Vb6" name="OfflineRenderer.h" compile="0" resource="0"
+            file="Source/OfflineRenderer.h"/>
+      <FILE id="yaVrcR" name="AudioFileWriter.cpp" compile="1" resource="0"
+            file="Source/AudioFileWriter.cpp"/>
+      <FILE id="wqVxUq" name="AudioFileWriter.h" compile="0" resource="0"
+            file="Source/AudioFileWriter.h"/>
       <FILE id="F6nrnw" name="SamplePool.cpp" compile="1" resource="0" file="Source/SamplePool.cpp"/>
       <FILE id="JGBTxF" name="SamplePool.h" compile="0" resource="0" file="Source/SamplePool.h"/>
       <FILE id="UepI8F" name="VariationPlayer.cpp" compile="1" resource="0"
