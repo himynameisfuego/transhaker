@@ -4,7 +4,7 @@
 #include "SamplePool.h"
 #include "VariationPlayer.h"
 
-// We'll add a real OfflineRenderer later.
+// TODO: real batch export in OfflineRenderer later
 class OfflineRenderer;
 
 class MainComponent
@@ -35,11 +35,11 @@ public:
     void sliderValueChanged(juce::Slider* s) override;
 
 private:
-    // === UI ===
-    juce::Label titleLabel{ {}, "Transhaker" };
+    // === UI elements ===
+    juce::Label titleLabel{ {}, "TRANSHAKER" };
     juce::Label filesLabel{ {}, "No samples loaded" };
 
-    juce::TextButton triggerButton{ "TRIGGER" };
+    juce::TextButton triggerButton{ "SHAKER" };
     juce::TextButton exportButton{ "EXPORT BATCH" };
 
     juce::Slider pitchRangeSlider;
@@ -54,13 +54,14 @@ private:
     juce::Label  lpfMinLabel{ {}, "LPF min (Hz)" };
     juce::Label  lpfMaxLabel{ {}, "LPF max (Hz)" };
 
-    // === audio / processing ===
-    SamplePool      samplePool;
-    VariationPlayer variationPlayer;
-    VariationPlayer::Params currentParams;
+    // We'll group sliders visually in a container Component
+    juce::Component slidersGroup;
 
+    // processing
+    SamplePool                  samplePool;
+    VariationPlayer             variationPlayer;
+    VariationPlayer::Params     currentParams;
     std::unique_ptr<OfflineRenderer> offlineRenderer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
-
 };
