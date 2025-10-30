@@ -1,6 +1,8 @@
 # Transhaker (aka Transient Shaker)
 A JUCE-based tiny tool that spits variations of your transient sounds.
 
+![alt text](screenshot.png "Screenshot")
+
 Repetitive transients used as sound effects (footsteps, gunshots, UI clicks) kill realism fast. Why not add some variation to them?
 
 The scope of this miniproject is to mimic runtime randomization logic common in middleware (FMOD/Wwise random containers), but in a lightweight standalone tool for designers.
