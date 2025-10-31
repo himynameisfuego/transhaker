@@ -200,7 +200,7 @@ void MainComponent::paint(juce::Graphics& g)
     // Bottom instruction text
     g.setColour(juce::Colours::black);
     g.setFont(juce::Font(15.0f, juce::Font::plain));
-    g.drawText("Drag & drop your footstep / impact .wav files anywhere in this window.",
+    g.drawText("Drag & drop your .wav files anywhere in this window.",
         getLocalBounds().reduced(10),
         juce::Justification::centredBottom,
         true);
