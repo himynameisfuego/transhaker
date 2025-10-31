@@ -1,4 +1,4 @@
-# 🥁 Transhaker (aka Transient Shaker) 🥁
+# 🥁😵💫 Transhaker (aka Transient Shaker) 
 *A JUCE-based tiny tool for procedural transients variation generation. Oriented for game audio design.*
 
 Repetitive transients used as sound effects (footsteps, gunshots, UI clicks) kill realism fast. Why not add some variation to them?
