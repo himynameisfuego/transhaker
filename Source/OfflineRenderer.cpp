@@ -134,33 +134,73 @@ bool OfflineRenderer::renderSingleVariation(juce::AudioBuffer<float>& outBuffer,
 void OfflineRenderer::renderBatch(juce::Component* parentForChooser)
 {
     if (pool == nullptr)
-        return;
-
-    // Ask user for target directory
-    juce::FileChooser chooser("Select a folder to save variations...",
-        juce::File::getSpecialLocation(juce::File::userDesktopDirectory),
-        juce::String(),
-        true);
-
-    if (!chooser.browseForDirectory())
-        return;
-
-    auto folder = chooser.getResult();
-
-    const int numToRender = 20; // fixed for now
-
-    for (int i = 0; i < numToRender; ++i)
     {
-        juce::AudioBuffer<float> rendered;
-        double sr = 44100.0;
-        if (!renderSingleVariation(rendered, sr))
-            continue;
-
-        juce::String fname = "transhaker_variation_" +
-            juce::String(i + 1).paddedLeft('0', 3) +
-            ".wav";
-
-        juce::File outFile = folder.getChildFile(fname);
-        AudioFileWriter::writeMonoBufferToWav(rendered, sr, outFile);
+        DBG("OfflineRenderer::renderBatch: pool is null, aborting");
+        return;
     }
+
+    // Create and keep chooser alive as a member so it doesn't get destroyed too early
+    activeChooser = std::make_unique<juce::FileChooser>(
+        "Select a folder to save variations...",
+        juce::File::getSpecialLocation(juce::File::userDesktopDirectory),
+        juce::String(),   // no wildcard pattern
+        true
+    );
+
+    DBG("OfflineRenderer::renderBatch: launching async chooser...");
+
+    activeChooser->launchAsync(
+        juce::FileBrowserComponent::canSelectDirectories,
+        [this](const juce::FileChooser& fc)
+        {
+            DBG("OfflineRenderer::renderBatch: callback entered");
+
+            // Once callback starts, we can release the chooser
+            std::unique_ptr<juce::FileChooser> chooserCleanup;
+            chooserCleanup.swap(activeChooser);
+
+            auto folder = fc.getResult();
+            if (folder == juce::File())
+            {
+                DBG("OfflineRenderer::renderBatch: user cancelled folder selection");
+                return;
+            }
+
+            DBG("OfflineRenderer::renderBatch: folder chosen = " + folder.getFullPathName());
+
+            const int numToRender = 20;
+
+            for (int i = 0; i < numToRender; ++i)
+            {
+                juce::AudioBuffer<float> rendered;
+                double sr = 44100.0;
+                if (!renderSingleVariation(rendered, sr))
+                {
+                    DBG("OfflineRenderer::renderBatch: renderSingleVariation failed for item " + juce::String(i));
+                    continue;
+                }
+
+                juce::String fname = "transhaker_variation_" +
+                    juce::String(i + 1).paddedLeft('0', 3) +
+                    ".wav";
+
+                juce::File outFile = folder.getChildFile(fname);
+
+                if (AudioFileWriter::writeMonoBufferToWav(rendered, sr, outFile))
+                {
+                    DBG("OfflineRenderer::renderBatch: wrote " + outFile.getFullPathName());
+                }
+                else
+                {
+                    DBG("OfflineRenderer::renderBatch: FAILED to write " + outFile.getFullPathName());
+                }
+            }
+
+            juce::AlertWindow::showMessageBoxAsync(
+                juce::AlertWindow::InfoIcon,
+                "Transhaker",
+                "Export complete!"
+            );
+        }
+    );
 }

@@ -42,7 +42,7 @@ MainComponent::MainComponent()
     setupSlider(lpfMinSlider, this, 2000.0, 20000.0, 4000.0);
     setupSlider(lpfMaxSlider, this, 2000.0, 20000.0, 12000.0);
 
-    // ✅ enforce black numbers on white background for each slider
+    // enforce black numbers on white background for each slider
     auto setSliderTextColors = [](juce::Slider& s)
         {
             s.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
@@ -266,11 +266,18 @@ void MainComponent::buttonClicked(juce::Button* b)
     }
     else if (b == &exportButton)
     {
-        if (!offlineRenderer)
-            offlineRenderer = std::make_unique<OfflineRenderer>();
-
-        offlineRenderer->renderBatch(this);
+        DBG("Export button pressed");
+        if (offlineRenderer)
+        {
+            DBG("Calling offlineRenderer->renderBatch");
+            offlineRenderer->renderBatch(this);
+        }
+        else
+        {
+            DBG("offlineRenderer is null!");
+        }
     }
+
 }
 
 void MainComponent::sliderValueChanged(juce::Slider* s)

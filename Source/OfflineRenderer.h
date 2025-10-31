@@ -32,4 +32,5 @@ private:
     SamplePool* pool = nullptr;
     VariationPlayer::Params params;
     juce::Random rng;
+    std::unique_ptr<juce::FileChooser> activeChooser;
 };
