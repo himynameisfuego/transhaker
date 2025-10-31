@@ -67,6 +67,20 @@ public:
             setUsingNativeTitleBar (true);
             setContentOwned (new MainComponent(), true);
 
+            // Icon img handling:
+            
+            juce::Image iconImg = juce::ImageFileFormat::loadFrom(
+                    BinaryData::icon_png,
+                    BinaryData::icon_pngSize
+            );
+
+            jassert(iconImg.isValid()); // will assert in Debug if loading failed
+            DBG("icon size: " << iconImg.getWidth() << "x" << iconImg.getHeight());
+
+            // Windows taskbar / Alt+Tab icon:
+            setIcon(iconImg);
+			getPeer()->setIcon(iconImg);
+
            #if JUCE_IOS || JUCE_ANDROID
             setFullScreen (true);
            #else
@@ -79,9 +93,6 @@ public:
 
         void closeButtonPressed() override
         {
-            // This is called when the user tries to close this window. Here, we'll just
-            // ask the app to quit when this happens, but you can change this to do
-            // whatever you need.
             JUCEApplication::getInstance()->systemRequestedQuit();
         }
 

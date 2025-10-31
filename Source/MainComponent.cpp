@@ -10,9 +10,18 @@ MainComponent::MainComponent()
     //
     // 1. Configure labels
     //
+    /*
     titleLabel.setFont(juce::Font(24.0f, juce::Font::bold));
     titleLabel.setJustificationType(juce::Justification::centred);
     titleLabel.setColour(juce::Label::textColourId, juce::Colours::black);
+    */
+
+    // Load logo from BinaryData
+    juce::Image logo = juce::ImageFileFormat::loadFrom(BinaryData::logotitleblack_png,
+        BinaryData::logotitleblack_pngSize);
+    titleImage.setImage(logo, juce::RectanglePlacement::centred);
+    addAndMakeVisible(titleImage);
+
 
     filesLabel.setJustificationType(juce::Justification::centred);
     filesLabel.setColour(juce::Label::textColourId, juce::Colours::black);
@@ -81,7 +90,7 @@ MainComponent::MainComponent()
     //
     // 4. Add child components to display
     //
-    addAndMakeVisible(titleLabel);
+    //addAndMakeVisible(titleLabel);
     addAndMakeVisible(triggerButton);
     addAndMakeVisible(exportButton);
 
@@ -169,13 +178,34 @@ void MainComponent::paint(juce::Graphics& g)
     // Lemon background
     g.fillAll(juce::Colour::fromRGB(255, 249, 152)); // light yellow
 
-    // Instruction text pinned to bottom
+    // --- top-right signature ---
+    {
+        g.setColour(juce::Colours::black.withAlpha(0.6f));
+        g.setFont(juce::Font(14.0f, juce::Font::plain));
+
+        auto bounds = getLocalBounds().reduced(10);
+        auto topRightArea = juce::Rectangle<int>(
+            bounds.getRight() - 200, // x
+            bounds.getY(),           // y (top)
+            190,                     // width
+            30                       // height
+        );
+
+        g.drawText("2025 Leonardo Fierro",
+            topRightArea,
+            juce::Justification::centredRight,
+            false);
+    }
+
+    // Bottom instruction text
     g.setColour(juce::Colours::black);
+    g.setFont(juce::Font(15.0f, juce::Font::plain));
     g.drawText("Drag & drop your footstep / impact .wav files anywhere in this window.",
         getLocalBounds().reduced(10),
         juce::Justification::centredBottom,
         true);
 }
+
 
 void MainComponent::resized()
 {
@@ -189,8 +219,12 @@ void MainComponent::resized()
     auto area = getLocalBounds().reduced(12);
 
     // Title at top
-    auto titleArea = area.removeFromTop(40);
-    titleLabel.setBounds(titleArea);
+    //auto titleArea = area.removeFromTop(40);
+    //titleLabel.setBounds(titleArea);
+    auto titleArea = area.removeFromTop(180); // give it more height
+    titleImage.setBounds(titleArea.reduced(10,5)); // center nicely
+
+
 
     // Buttons row under title
     auto buttonRow = area.removeFromTop(40);

@@ -36,7 +36,8 @@ public:
 
 private:
     // === UI elements ===
-    juce::Label titleLabel{ {}, "TRANSHAKER" };
+    //juce::Label titleLabel{ {}, "TRANSHAKER" };
+    juce::ImageComponent titleImage;
     juce::Label filesLabel{ {}, "No samples loaded" };
 
     juce::TextButton triggerButton{ "SHAKER" };

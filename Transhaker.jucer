@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="AJjHpk" name="Transhaker" projectType="guiapp" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" version="0.1.0">
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" version="0.1.0"
+              companyWebsite="https://github.com/himynameisfuego/" companyEmail="lrd.fierro@gmail.com"
+              companyName="Leonardo Fierro">
   <MAINGROUP id="n7H7sK" name="Transhaker">
     <GROUP id="{29B45408-DAB7-81EE-5A42-A31C16388ACE}" name="Source">
+      <FILE id="iJFWUE" name="icon.png" compile="0" resource="1" file="Docs/icon.png"/>
+      <FILE id="SEbwc7" name="logo.png" compile="0" resource="1" file="Docs/logo.png"/>
+      <FILE id="onkCqT" name="logotitleblack.png" compile="0" resource="1"
+            file="Docs/logotitleblack.png"/>
+      <FILE id="D1XVgE" name="logotitlewhite.png" compile="0" resource="1"
+            file="Docs/logotitlewhite.png"/>
       <FILE id="ETAY9j" name="OfflineRenderer.cpp" compile="1" resource="0"
             file="Source/OfflineRenderer.cpp"/>
       <FILE id="AR4Vb6" name="OfflineRenderer.h" compile="0" resource="0"

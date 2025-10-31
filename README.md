@@ -74,6 +74,7 @@ Transhaker is composed of lightweight JUCE components:
 5. Press **EXPORT BATCH** → choose a folder → get 20 rendered variations.
 
 ## Next steps
+* fix missing titlebar/taskbar icon loading
 * add batch size selection
 * add time-stretching features
 * add stereo widening / random pan
