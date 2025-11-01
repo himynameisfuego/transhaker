@@ -15,7 +15,7 @@ It supports two distinct processing modes:
 | Mode | Description |
 |------|--------------|
 | 🧂 **OG Shaker** | Classic transient randomization: pitch, gain, start offset, and low-pass filtering. |
-| 🪶 **Velvet Shaker** | Based on *velvet noise decorrelation* from [Fagerström et al., DAFx20in21](#-reference), creating subtle phase and timing microvariations for more organic results. |
+| 💜 **Velvet Shaker** | Based on *velvet noise decorrelation* from [Fagerström et al., DAFx20in21](#-reference), creating subtle phase and timing microvariations for more organic results. |
 
 The goal of this mini project is to create a lightweight standalone tool with a fast and intuitive way to produce multiple believable variations from a single input sound, ready for use in FMOD, Wwise, or Unity.
 
