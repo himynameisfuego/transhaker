@@ -7,34 +7,48 @@
 
 MainComponent::MainComponent()
 {
-    //
-    // 1. Configure labels
-    //
-    /*
-    titleLabel.setFont(juce::Font(24.0f, juce::Font::bold));
-    titleLabel.setJustificationType(juce::Justification::centred);
-    titleLabel.setColour(juce::Label::textColourId, juce::Colours::black);
-    */
+    // --- Title image ---
+    {
+        juce::Image logo = juce::ImageFileFormat::loadFrom(
+            BinaryData::logotitleblack_png,
+            BinaryData::logotitleblack_pngSize
+        );
+        titleImage.setImage(logo, juce::RectanglePlacement::centred);
+        addAndMakeVisible(titleImage);
+    }
 
-    // Load logo from BinaryData
-    juce::Image logo = juce::ImageFileFormat::loadFrom(BinaryData::logotitleblack_png,
-        BinaryData::logotitleblack_pngSize);
-    titleImage.setImage(logo, juce::RectanglePlacement::centred);
-    addAndMakeVisible(titleImage);
+    // --- Mode selector ---
+    modeSelector.addItem("OG SHAKER", 1);
+    modeSelector.addItem("VELVET SHAKER", 2);
+    modeSelector.setSelectedId(1);
+    addAndMakeVisible(modeSelector);
 
+    modeSelector.onChange = [this]()
+        {
+            variationPlayer.setMode(isVelvetMode()
+                ? VariationPlayer::Mode::Velvet
+                : VariationPlayer::Mode::OG);
 
+            updateVisibleSliders();
+        };
+
+    // --- Labels ---
     filesLabel.setJustificationType(juce::Justification::centred);
     filesLabel.setColour(juce::Label::textColourId, juce::Colours::black);
 
-    pitchLabel.setColour(juce::Label::textColourId, juce::Colours::black);
-    gainLabel.setColour(juce::Label::textColourId, juce::Colours::black);
-    offsetLabel.setColour(juce::Label::textColourId, juce::Colours::black);
-    lpfMinLabel.setColour(juce::Label::textColourId, juce::Colours::black);
-    lpfMaxLabel.setColour(juce::Label::textColourId, juce::Colours::black);
+    auto makeLabelBlack = [](juce::Label& lab)
+        {
+            lab.setColour(juce::Label::textColourId, juce::Colours::black);
+        };
+    makeLabelBlack(pitchLabel);
+    makeLabelBlack(gainLabel);
+    makeLabelBlack(offsetLabel);
+    makeLabelBlack(lpfMinLabel);
+    makeLabelBlack(lpfMaxLabel);
+    makeLabelBlack(velvetStrengthLabel);
+    makeLabelBlack(velvetDelayLabel);
 
-    //
-    // 2. Configure sliders
-    //
+    // --- Sliders ---
     auto setupSlider = [](juce::Slider& s, juce::Slider::Listener* l,
         double min, double max, double init)
         {
@@ -51,7 +65,9 @@ MainComponent::MainComponent()
     setupSlider(lpfMinSlider, this, 2000.0, 20000.0, 4000.0);
     setupSlider(lpfMaxSlider, this, 2000.0, 20000.0, 12000.0);
 
-    // enforce black numbers on white background for each slider
+    setupSlider(velvetStrengthSlider, this, 0.0, 0.3, 0.08);
+    setupSlider(velvetDelaySlider, this, 2.0, 20.0, 10.0);
+
     auto setSliderTextColors = [](juce::Slider& s)
         {
             s.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
@@ -63,270 +79,229 @@ MainComponent::MainComponent()
     setSliderTextColors(offsetMsSlider);
     setSliderTextColors(lpfMinSlider);
     setSliderTextColors(lpfMaxSlider);
+    setSliderTextColors(velvetStrengthSlider);
+    setSliderTextColors(velvetDelaySlider);
 
-
-    // Make slider look good on lemon background:
-    auto& laf = getLookAndFeel();
-    laf.setColour(juce::Slider::trackColourId, juce::Colours::black.withAlpha(0.5f));
-    laf.setColour(juce::Slider::thumbColourId, juce::Colours::black);
-    laf.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
-    laf.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::white.withAlpha(0.9f));
-    laf.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::black.withAlpha(0.2f));
-
-    //
-    // 3. Configure buttons
-    //
+    // --- Buttons ---
     triggerButton.addListener(this);
     exportButton.addListener(this);
 
     triggerButton.setColour(juce::TextButton::buttonColourId, juce::Colours::black);
     triggerButton.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
-    triggerButton.setColour(juce::TextButton::textColourOnId, juce::Colours::white);
-
     exportButton.setColour(juce::TextButton::buttonColourId, juce::Colours::black);
     exportButton.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
-    exportButton.setColour(juce::TextButton::textColourOnId, juce::Colours::white);
 
-    //
-    // 4. Add child components to display
-    //
-    //addAndMakeVisible(titleLabel);
+    // --- Add components ---
     addAndMakeVisible(triggerButton);
     addAndMakeVisible(exportButton);
-
-    // The sliders + their labels will be placed inside slidersGroup
     addAndMakeVisible(slidersGroup);
+    addAndMakeVisible(filesLabel);
 
     slidersGroup.addAndMakeVisible(pitchLabel);
     slidersGroup.addAndMakeVisible(pitchRangeSlider);
-
     slidersGroup.addAndMakeVisible(gainLabel);
     slidersGroup.addAndMakeVisible(gainRangeSlider);
-
     slidersGroup.addAndMakeVisible(offsetLabel);
     slidersGroup.addAndMakeVisible(offsetMsSlider);
-
     slidersGroup.addAndMakeVisible(lpfMinLabel);
     slidersGroup.addAndMakeVisible(lpfMinSlider);
-
     slidersGroup.addAndMakeVisible(lpfMaxLabel);
     slidersGroup.addAndMakeVisible(lpfMaxSlider);
 
-    addAndMakeVisible(filesLabel);
+    slidersGroup.addAndMakeVisible(velvetStrengthLabel);
+    slidersGroup.addAndMakeVisible(velvetStrengthSlider);
+    slidersGroup.addAndMakeVisible(velvetDelayLabel);
+    slidersGroup.addAndMakeVisible(velvetDelaySlider);
 
-    //
-    // 5. Audio engine hookup
-    //
+    // --- DSP hookup ---
     variationPlayer.setSamplePool(&samplePool);
 
-    // Initialize parameter struct from sliders
+    // Params initialisation
     currentParams.pitchPercentRange = (float)pitchRangeSlider.getValue();
     currentParams.gainDbRange = (float)gainRangeSlider.getValue();
     currentParams.maxOffsetMs = (float)offsetMsSlider.getValue();
     currentParams.lpfMinHz = (float)lpfMinSlider.getValue();
     currentParams.lpfMaxHz = (float)lpfMaxSlider.getValue();
-    // sampleRate filled in prepareToPlay()
+    currentParams.velvetStrength = (float)velvetStrengthSlider.getValue();
+    currentParams.velvetMinDelayMs = 2.0f;
+    currentParams.velvetMaxDelayMs = (float)velvetDelaySlider.getValue();
+    currentParams.velvetNumTaps = 50;
 
     variationPlayer.setParams(currentParams);
-    offlineRenderer = std::make_unique<OfflineRenderer>();
-    offlineRenderer->setSamplePool(&samplePool);
-    offlineRenderer->setParams(currentParams);
-
-    // Request 0 inputs, 2 outputs
     setAudioChannels(0, 2);
-
     setSize(800, 500);
+
+    updateVisibleSliders();
 }
 
-MainComponent::~MainComponent()
-{
-    shutdownAudio();
-}
+MainComponent::~MainComponent() { shutdownAudio(); }
 
 // =========================================================
-// AudioAppComponent
+// Audio
 // =========================================================
 
 void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
     variationPlayer.prepareToPlay(samplesPerBlockExpected, sampleRate);
-
     currentParams.sampleRate = sampleRate;
     variationPlayer.setParams(currentParams);
-
     if (offlineRenderer)
         offlineRenderer->setParams(currentParams);
 }
-
 
 void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
     variationPlayer.getNextAudioBlock(bufferToFill);
 }
 
-void MainComponent::releaseResources()
-{
-    variationPlayer.releaseResources();
-}
+void MainComponent::releaseResources() { variationPlayer.releaseResources(); }
 
 // =========================================================
-// Painting / layout
+// Paint / layout
 // =========================================================
 
 void MainComponent::paint(juce::Graphics& g)
 {
-    // Lemon background
-    g.fillAll(juce::Colour::fromRGB(255, 249, 152)); // light yellow
+    g.fillAll(juce::Colour::fromRGB(255, 249, 152));
 
-    // --- top-right signature ---
-    {
-        g.setColour(juce::Colours::black.withAlpha(0.6f));
-        g.setFont(juce::Font(14.0f, juce::Font::plain));
+    // --- signature text (moved slightly left) ---
+    g.setColour(juce::Colours::black.withAlpha(0.6f));
+    g.setFont(juce::Font(14.0f));
+    auto sigArea = getLocalBounds().removeFromTop(30);
+    sigArea.removeFromRight(20); // add right padding
+    g.drawText("2025 Leonardo Fierro", sigArea.removeFromRight(180),
+        juce::Justification::centredRight);
 
-        auto bounds = getLocalBounds().reduced(10);
-        auto topRightArea = juce::Rectangle<int>(
-            bounds.getRight() - 200, // x
-            bounds.getY(),           // y (top)
-            190,                     // width
-            30                       // height
-        );
-
-        g.drawText("2025 Leonardo Fierro",
-            topRightArea,
-            juce::Justification::centredRight,
-            false);
-    }
-
-    // Bottom instruction text
+    // --- drag/drop text (leave margin for file label above it) ---
     g.setColour(juce::Colours::black);
-    g.setFont(juce::Font(15.0f, juce::Font::plain));
-    g.drawText("Drag & drop your .wav files anywhere in this window.",
-        getLocalBounds().reduced(10),
+    g.setFont(juce::Font(15.0f));
+    juce::Rectangle<int> bottomArea = getLocalBounds();
+    bottomArea.removeFromBottom(15);     // margin from window edge
+    bottomArea.removeFromTop(bottomArea.getHeight() - 40); // reserve 40px tall zone
+    g.drawText("Drag & drop your footstep / impact .wav files anywhere in this window.",
+        bottomArea,
         juce::Justification::centredBottom,
         true);
 }
 
-
 void MainComponent::resized()
 {
-    // We'll lay out in vertical zones:
-    // [ title ]
-    // [ buttons row ]
-    // [ slidersGroup ]
-    // [ filesLabel status ]
-    // [ bottom text painted in paint() ]
-
     auto area = getLocalBounds().reduced(12);
 
-    // Title at top
-    //auto titleArea = area.removeFromTop(40);
-    //titleLabel.setBounds(titleArea);
-    auto titleArea = area.removeFromTop(180); // give it more height
-    titleImage.setBounds(titleArea.reduced(10,5)); // center nicely
+    auto titleArea = area.removeFromTop(180);
+    titleImage.setBounds(titleArea.reduced(10, 5));
 
+    auto comboRow = area.removeFromTop(40);
+    modeSelector.setBounds(comboRow.removeFromLeft(200).reduced(5));
 
-
-    // Buttons row under title
     auto buttonRow = area.removeFromTop(40);
-    {
-        auto left = buttonRow.removeFromLeft(140);
-        triggerButton.setBounds(left.reduced(4));
+    triggerButton.setBounds(buttonRow.removeFromLeft(140).reduced(4));
+    exportButton.setBounds(buttonRow.removeFromLeft(160).reduced(4));
 
-        auto right = buttonRow.removeFromLeft(160);
-        exportButton.setBounds(right.reduced(4));
+    auto sgArea = area.removeFromTop(200);
+    slidersGroup.setBounds(sgArea.reduced(4));
+
+    // Reserve consistent rows
+    auto groupArea = slidersGroup.getLocalBounds().reduced(4);
+    auto rowH = 30;
+
+    auto layoutRow = [&groupArea, rowH](juce::Label& lab, juce::Slider& s)
+        {
+            auto row = groupArea.removeFromTop(rowH);
+            lab.setBounds(row.removeFromLeft(200));
+            s.setBounds(row);
+        };
+
+    if (!isVelvetMode())
+    {
+        layoutRow(pitchLabel, pitchRangeSlider);
+        layoutRow(gainLabel, gainRangeSlider);
+        layoutRow(offsetLabel, offsetMsSlider);
+        layoutRow(lpfMinLabel, lpfMinSlider);
+        layoutRow(lpfMaxLabel, lpfMaxSlider);
+    }
+    else
+    {
+        layoutRow(velvetStrengthLabel, velvetStrengthSlider);
+        layoutRow(velvetDelayLabel, velvetDelaySlider);
     }
 
-    // Sliders group block
-    auto slidersArea = area.removeFromTop(160);
-    slidersGroup.setBounds(slidersArea.reduced(4));
-
-    // Inside slidersGroup, we stack rows like:
-    // [label | slider]
-    {
-        auto sgArea = slidersGroup.getLocalBounds().reduced(4);
-        auto rowH = 30;
-
-        auto placeRow = [&sgArea, rowH](juce::Label& lab, juce::Slider& s)
-            {
-                auto row = sgArea.removeFromTop(rowH);
-                auto labW = 200;
-                lab.setBounds(row.removeFromLeft(labW));
-                s.setBounds(row);
-            };
-
-        placeRow(pitchLabel, pitchRangeSlider);
-        placeRow(gainLabel, gainRangeSlider);
-        placeRow(offsetLabel, offsetMsSlider);
-        placeRow(lpfMinLabel, lpfMinSlider);
-        placeRow(lpfMaxLabel, lpfMaxSlider);
-    }
-
-    // File status label (how many samples loaded)
-    auto fileRow = area.removeFromTop(30);
-    filesLabel.setBounds(fileRow);
+    // --- files label now sits ABOVE bottom drag text ---
+    filesLabel.setBounds(area.removeFromBottom(60).reduced(10, 10));
 }
 
 // =========================================================
-// Drag & drop
+// File drag/drop
 // =========================================================
 
-bool MainComponent::isInterestedInFileDrag(const juce::StringArray& files)
-{
-    juce::ignoreUnused(files);
-    return true;
-}
+bool MainComponent::isInterestedInFileDrag(const juce::StringArray&) { return true; }
 
 void MainComponent::filesDropped(const juce::StringArray& files, int, int)
 {
-    const int loadedNow = samplePool.loadFiles(files);
-
+    int loadedNow = samplePool.loadFiles(files);
     filesLabel.setText(
         juce::String(loadedNow) + " new file(s) loaded, total " +
         juce::String(samplePool.getNumSamples()) + " sample(s)",
-        juce::dontSendNotification
-    );
+        juce::dontSendNotification);
 }
 
 // =========================================================
-// UI callbacks
+// Buttons / sliders
 // =========================================================
 
 void MainComponent::buttonClicked(juce::Button* b)
 {
     if (b == &triggerButton)
-    {
-        // Play one random, randomized variation
         variationPlayer.triggerRandom();
-    }
-    else if (b == &exportButton)
-    {
-        DBG("Export button pressed");
-        if (offlineRenderer)
-        {
-            DBG("Calling offlineRenderer->renderBatch");
-            offlineRenderer->renderBatch(this);
-        }
-        else
-        {
-            DBG("offlineRenderer is null!");
-        }
-    }
-
+    else if (b == &exportButton && offlineRenderer)
+        offlineRenderer->renderBatch(this);
 }
 
-void MainComponent::sliderValueChanged(juce::Slider* s)
+void MainComponent::sliderValueChanged(juce::Slider*)
 {
-    juce::ignoreUnused(s);
-
-    // sync GUI -> param struct
     currentParams.pitchPercentRange = (float)pitchRangeSlider.getValue();
     currentParams.gainDbRange = (float)gainRangeSlider.getValue();
     currentParams.maxOffsetMs = (float)offsetMsSlider.getValue();
     currentParams.lpfMinHz = (float)lpfMinSlider.getValue();
     currentParams.lpfMaxHz = (float)lpfMaxSlider.getValue();
-    // sampleRate already stored in currentParams.sampleRate
+    currentParams.velvetStrength = (float)velvetStrengthSlider.getValue();
+    currentParams.velvetMaxDelayMs = (float)velvetDelaySlider.getValue();
+    currentParams.velvetMinDelayMs = 2.0f;
+    currentParams.velvetNumTaps = 50;
 
     variationPlayer.setParams(currentParams);
     if (offlineRenderer)
         offlineRenderer->setParams(currentParams);
+}
+
+// =========================================================
+// Visibility control
+// =========================================================
+
+bool MainComponent::isVelvetMode() const
+{
+    return (modeSelector.getSelectedId() == 2);
+}
+
+void MainComponent::updateVisibleSliders()
+{
+    const bool velvet = isVelvetMode();
+
+    pitchRangeSlider.setVisible(!velvet);
+    pitchLabel.setVisible(!velvet);
+    gainRangeSlider.setVisible(!velvet);
+    gainLabel.setVisible(!velvet);
+    offsetMsSlider.setVisible(!velvet);
+    offsetLabel.setVisible(!velvet);
+    lpfMinSlider.setVisible(!velvet);
+    lpfMinLabel.setVisible(!velvet);
+    lpfMaxSlider.setVisible(!velvet);
+    lpfMaxLabel.setVisible(!velvet);
+
+    velvetStrengthSlider.setVisible(velvet);
+    velvetStrengthLabel.setVisible(velvet);
+    velvetDelaySlider.setVisible(velvet);
+    velvetDelayLabel.setVisible(velvet);
+
+    resized();
 }
