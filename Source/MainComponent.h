@@ -4,7 +4,6 @@
 #include "SamplePool.h"
 #include "VariationPlayer.h"
 
-// TODO: real batch export in OfflineRenderer later
 class OfflineRenderer;
 
 class MainComponent
@@ -17,32 +16,31 @@ public:
     MainComponent();
     ~MainComponent() override;
 
-    // AudioAppComponent
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) override;
     void releaseResources() override;
 
-    // Painting / layout
     void paint(juce::Graphics& g) override;
     void resized() override;
 
-    // Drag & drop of audio files
     bool isInterestedInFileDrag(const juce::StringArray& files) override;
     void filesDropped(const juce::StringArray& files, int x, int y) override;
 
-    // UI callbacks
     void buttonClicked(juce::Button* b) override;
     void sliderValueChanged(juce::Slider* s) override;
 
 private:
     // === UI elements ===
-    //juce::Label titleLabel{ {}, "TRANSHAKER" };
     juce::ImageComponent titleImage;
     juce::Label filesLabel{ {}, "No samples loaded" };
 
     juce::TextButton triggerButton{ "SHAKER" };
     juce::TextButton exportButton{ "EXPORT BATCH" };
 
+    // Mode selector
+    juce::ComboBox modeSelector;
+
+    // --- OG Shaker sliders ---
     juce::Slider pitchRangeSlider;
     juce::Slider gainRangeSlider;
     juce::Slider offsetMsSlider;
@@ -55,7 +53,13 @@ private:
     juce::Label  lpfMinLabel{ {}, "LPF min (Hz)" };
     juce::Label  lpfMaxLabel{ {}, "LPF max (Hz)" };
 
-    // We'll group sliders visually in a container Component
+    // --- Velvet Shaker sliders ---
+    juce::Slider velvetStrengthSlider;
+    juce::Slider velvetDelaySlider;
+    juce::Label velvetStrengthLabel{ {}, "Velvet Strength" };
+    juce::Label velvetDelayLabel{ {}, "Delay Range (ms)" };
+
+    // container for laying out the rows
     juce::Component slidersGroup;
 
     // processing
@@ -63,6 +67,9 @@ private:
     VariationPlayer             variationPlayer;
     VariationPlayer::Params     currentParams;
     std::unique_ptr<OfflineRenderer> offlineRenderer;
+
+    void updateVisibleSliders();
+    bool isVelvetMode() const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

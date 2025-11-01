@@ -3,103 +3,77 @@
 #include <JuceHeader.h>
 #include "SamplePool.h"
 
-// super simple one-pole lowpass
-struct SimpleOnePoleLPF
-{
-    void prepare(double sampleRateHz)
-    {
-        sr = sampleRateHz;
-        zL = 0.0f;
-        zR = 0.0f;
-        setCutoff(10000.0f); // default
-    }
-
-    void setCutoff(float newCutHz)
-    {
-        // one-pole lowpass coefficient:
-        // y[n] = a * x[n] + b * y[n-1]
-        // a = 1 - e^(-2*pi*fc/sr)
-        // b = e^(-2*pi*fc/sr)
-        const float x = std::exp(-2.0f * juce::MathConstants<float>::pi * newCutHz / (float)sr);
-        a = 1.0f - x;
-        b = x;
-    }
-
-    inline float processL(float xIn)
-    {
-        zL = a * xIn + b * zL;
-        return zL;
-    }
-
-    inline float processR(float xIn)
-    {
-        zR = a * xIn + b * zR;
-        return zR;
-    }
-
-    double sr = 48000.0;
-    float a = 1.0f, b = 0.0f;
-    float zL = 0.0f, zR = 0.0f;
-};
-
-
-// VariationPlayer:
-// - Holds a pointer to SamplePool
-// - On triggerRandom(), picks one sample and locks in randomized params
-// - Audio thread pulls from that "armed" sample until it's done
-class VariationPlayer : public juce::AudioSource
+// VariationPlayer
+//  - Generates per-trigger one-shot variations for playback.
+//  - Two modes:
+//      * OG: pitch/gain/start offset/LPF randomization
+//      * Velvet: velvet-noise-style microvariation (placeholder impl now)
+//  - Acts as the audio source feeding the main output.
+class VariationPlayer
 {
 public:
-    VariationPlayer() = default;
-
-    void setSamplePool(SamplePool* p) { pool = p; }
-
-    // Called by UI thread to set parameter ranges for randomization
+    // Parameters controlled by UI sliders
     struct Params
     {
-        // +/- pitchPercent not yet used (for future pitch shift)
-        float pitchPercentRange = 5.0f;      // e.g. 5 -> ±5%
-        float gainDbRange = 3.0f;      // e.g. 3 -> ±3 dB
-        float maxOffsetMs = 5.0f;      // skip up to this many ms at start
-        float lpfMinHz = 4000.0f;   // not used yet
-        float lpfMaxHz = 12000.0f;  // not used yet
-        double sampleRate = 44100.0;   // host sample rate (filled in prepareToPlay)
+        double sampleRate = 44100.0;  // gets set in prepareToPlay()
+
+        float pitchPercentRange = 5.0f;     // +/- % pitch shift range
+        float gainDbRange = 3.0f;     // +/- dB gain variation
+        float maxOffsetMs = 5.0f;     // max random start offset
+        float lpfMinHz = 2000.0f;  // LPF lower bound
+        float lpfMaxHz = 12000.0f; // LPF upper bound
+
+        float velvetStrength = 0.08f;
+        float velvetMinDelayMs = 2.0f;
+        float velvetMaxDelayMs = 12.0f;
+        int   velvetNumTaps = 50;
     };
 
-    void setParams(const Params& newParams)
-    {
-        const juce::ScopedLock sl(lock);
-        params = newParams;
-    }
+    // Playback algorithm mode: OG SHAKER vs VELVET SHAKER
+    enum class Mode { OG, Velvet };
 
-    // AudioSource
-    void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
-    void releaseResources() override;
-    void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) override;
+    VariationPlayer();
 
-    // UI calls this when user clicks TRIGGER
+    // hook up the shared sample pool so we can pick random source files
+    void setSamplePool(SamplePool* p);
+
+    // push updated UI params (sliders etc.)
+    void setParams(const Params& p);
+
+    // choose which algorithm to use
+    void setMode(Mode m) { mode = m; }
+
+    // JUCE audio lifecycle integration
+    void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
+    void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
+    void releaseResources();
+
+    // called when user hits SHAKER (or when OfflineRenderer wants a new variation)
     void triggerRandom();
 
 private:
-    juce::CriticalSection lock;
+    // --- Internal helpers ---
 
-    SamplePool* pool = nullptr;
+    // Variant for velvet-noise style shaking
+    void triggerVelvetVariation();
 
-    // current "voice" state that the audio thread will read
-    juce::AudioSampleBuffer currentSample;
-    double playPos = 0.0;   // fractional playback position (in samples, after offset)
-    int    totalLen = 0;     // total available samples after offset
-    float  gainLinear = 1.0f;  // baked-in random gain
-    int    startOffsetSamps = 0;   // baked-in random offset
-    double playbackRate = 1.0;   // >1.0 plays faster/pitch up, <1.0 slower/pitch down
+    // Applies a "velvet noise" style modulation to buffer in-place.
+    // Current implementation is a simplified placeholder:
+    //   - Generate sparse ±1 impulses (velvet noise)
+    //   - Smooth slightly
+    //   - Use result to modulate amplitude
+    //
+    // We'll later upgrade this to match the DAFx "one-to-many" decorrelation kernel.
+    void applyVelvetNoise(juce::AudioBuffer<float>& buffer);
 
-    SimpleOnePoleLPF lpf;
-    float currentCutoffHz = 10000.0f;
+private:
+    SamplePool* samplePool = nullptr;   // not owned
 
-    Params params;
+    Params params;                      // current randomization ranges from UI
+
+    juce::AudioBuffer<float> currentBuffer; // mono buffer to stream out
+    int currentPosition = 0;                // playback cursor into currentBuffer
+
     juce::Random rng;
-
-    double currentSampleRate = 44100.0;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(VariationPlayer)
+    Mode mode = Mode::OG;
 };
