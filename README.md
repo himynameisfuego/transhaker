@@ -15,7 +15,7 @@ It supports two distinct processing modes:
 | Mode | Description |
 |------|--------------|
 | 🧂 **OG Shaker** | Classic transient randomization: pitch, gain, start offset, and low-pass filtering. |
-| 💜 **Velvet Shaker** | Based on *velvet noise decorrelation* from [Fagerström et al., DAFx20in21](#-reference), creating subtle phase and timing microvariations for more organic results. |
+| 💜 **Velvet Shaker** | Based on *velvet noise decorrelation* from [Fagerström et al., DAFx20in21](https://www.dafx.de/paper-archive/2021/proceedings/papers/DAFx20in21_paper_22.pdf), creating subtle phase and timing microvariations for more organic results.
 
 The goal of this mini project is to create a lightweight standalone tool with a fast and intuitive way to produce multiple believable variations from a single input sound, ready for use in FMOD, Wwise, or Unity.
 
@@ -67,10 +67,9 @@ Transhaker is composed of lightweight JUCE components:
 
 ## 💜 Velvet Noise Decorrelator
 The *Velvet Shaker* mode implements an adaptation of the **velvet noise decorrelation technique** introduced by  
-**Jon Fagerström, Sebastian Gäbel, and Vesa Välimäki**,  
-in their paper:
+**Jon Fagerström et. al**, in their paper:
 
-> *T. Fagerström, S. Gäbel, and V. Välimäki, “One-to-Many: Augmenting Audio Datasets with Velvet Noise Decorrelators,” in Proc. of the 24th International Conference on Digital Audio Effects (DAFx20in21), Vienna, Austria, 2021.*
+> *Jon Fagerström, Sebastian J. Schlecht, Vesa Välimäki. One-To-Many Conversion for Percussive Samples. In Proceedings of the International Conference on Digital Audio Effects (DAFx21), September 2021..*
 
 The method uses sparse sequences of ±1 impulses (velvet noise) with randomized delay distributions to produce perceptually decorrelated versions of the same sound, maintaining timbral identity while introducing natural micro-differences — ideal for procedural asset augmentation and dataset expansion.
 
