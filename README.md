@@ -65,7 +65,7 @@ Transhaker is composed of lightweight JUCE components:
 
 ---
 
-## 🪶 Velvet Noise Decorrelator
+## 💜 Velvet Noise Decorrelator
 The *Velvet Shaker* mode implements an adaptation of the **velvet noise decorrelation technique** introduced by  
 **Jon Fagerström, Sebastian Gäbel, and Vesa Välimäki**,  
 in their paper:
